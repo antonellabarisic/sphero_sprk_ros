@@ -1,0 +1,12 @@
+<launch>
+
+	<arg name="adr1" default="E2:6A:A9:2C:64:3D"/> <!-- Sphero1 address -->
+	<arg name="prvi" default="1"/> <!-- Sphero number -->
+
+	<node pkg="sphero_sprk_ros" type="sphero_node.py" name="driver" ns="sphero_1" output="screen" >
+		<param name="address" type="str" value="$(arg adr1)"/>
+		<param name="num" type="str" value="$(arg prvi)"/>
+		<param name="~data_stream" type="str" value="All"/>
+	</node>
+
+</launch>
