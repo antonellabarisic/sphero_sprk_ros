@@ -17,7 +17,10 @@ Note: The driver can be used without ROS.
 
 ## <a name="Installation"></a> Installation
 ```sphero_sprk_ros``` is tested on Ubuntu 16.04/ROS Kinetic and Ubuntu 18.04/ROS Melodic. Due to BLE connection problems connected with kernel versions, we verified following versions of the kernel:
+- 4.4.0-21
 - 4.4.0-164
+- 5.0.0-23
+- 5.0.0-29 (Recommended)
 
 ### <a name="Requirements"></a> Requirements
 - Ubuntu 16.04 / Ubuntu 18.04
