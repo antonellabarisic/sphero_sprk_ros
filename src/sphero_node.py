@@ -91,8 +91,12 @@ class SpheroNode(object):
             # Set initial color of Sphero indicating connection.
             self.robot.set_rgb_led(self.connect_color_red, self.connect_color_green,
                                    self.connect_color_blue, 1, False)
-        except:
+        except Exception as e:
             rospy.logerr("Failed to connect to Sphero.")
+            print("\033[1m\033[31mPlease send this error message to marko.krizmancic@fer.hr:\n\n"
+                  "While trying to connect to Sphero, script exited with this error: \n"
+                  "Type: {}\n"
+                  "Message: {}\n\033[0m".format(sys.exc_info()[0].__name__, e))
             sys.exit(1)
 
         if self._data_stream == 'All':
