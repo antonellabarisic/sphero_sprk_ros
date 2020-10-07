@@ -64,6 +64,7 @@ class SpheroNode(object):
     def _init_params(self):
         """Initialize parameters for the starting color and velocity."""
         self.cmd_heading = 0
+        self.last_cmd_heading = 0
         self.cmd_speed = 0
         self.last_cmd_vel_time = rospy.Time.now()
         self.last_diagnostics_time = rospy.Time.now()
@@ -144,8 +145,11 @@ class SpheroNode(object):
         """Send command for setting the velocity. Expected message type:Twist."""
         if self.is_connected:
             self.last_cmd_vel_time = rospy.Time.now()
-            self.cmd_heading = self.normalize_angle_positive(
-                math.atan2(msg.linear.x, msg.linear.y)) * 180 / math.pi
+            if (msg.linear.x == 0 and msg.linear.y == 0):
+                self.cmd_heading = self.last_cmd_heading
+            else:
+                self.cmd_heading = self.normalize_angle_positive(math.atan2(msg.linear.x, msg.linear.y)) * 180 / math.pi
+                self.last_cmd_heading = self.cmd_heading
             self.cmd_speed = math.sqrt(math.pow(msg.linear.x, 2) + math.pow(msg.linear.y, 2))
             self.robot.roll(int(self.cmd_speed), int(self.cmd_heading), 1, False)
 
