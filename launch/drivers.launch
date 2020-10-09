@@ -21,6 +21,6 @@
         <param name="dev" type="string" value="$(arg joy_path)"/>
         <param name="deadzone" value="0"/>
     </node>
-		<node pkg="sphero_sprk_ros" type="manual_ctrl_launch.sh" name="joystick_launcher" args="$(arg sensitivity)" output="screen"/>
+		<node pkg="sphero_teleop" type="manual_ctrl_launch.sh" name="joystick_launcher" args="$(arg sensitivity)" output="screen"/>
 	</group>
 </launch>
