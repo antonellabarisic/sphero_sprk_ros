@@ -1,26 +1,11 @@
 <launch>
 	<!-- Set args -->
   <arg name="num_of_robots" default="1"/>
-	<arg name="manual_control" default="true"/>
-	<arg name="sensitivity" default="0.2"/>          	<!-- Sensitivity of a joystick. [0.0 - 1.0] -->
-	<arg name="joy_path" default="/dev/input/js0"/> 	<!-- Joystick device path. -->
 	<arg name="data_stream_option" default="None"/>		<!-- Options for Sphero's data stream: None, All, Locator -->
 
 	<!-- Config file with Sphero addresses -->
 	<arg name="filename" default="$(find sphero_sprk_ros)/cfg/sphero_addresses.txt"/>
 
-	<!-- Set arguments as ros parameter so all nodes can access them. -->
-	<param name="num_of_robots" type="int" value="$(arg num_of_robots)"/>
-
 	<!-- Start Sphero driver nodes launcher. -->
 	<node pkg="sphero_sprk_ros" type="drivers_launch.sh" name="drivers_launcher" args="$(arg num_of_robots) $(arg filename) $(arg data_stream_option)" output="screen"/>
-
-	<!-- Start manual control and joystick nodes. -->
-	<group if="$(arg manual_control)">
-    <node pkg="joy" type="joy_node" name="JoyInput">
-        <param name="dev" type="string" value="$(arg joy_path)"/>
-        <param name="deadzone" value="0"/>
-    </node>
-		<node pkg="sphero_teleop" type="manual_ctrl_launch.sh" name="joystick_launcher" args="$(arg sensitivity)" output="screen"/>
-	</group>
 </launch>
