@@ -1,19 +1,21 @@
 #! /usr/bin/env python
+import sys
+import copy
+import math
 
 import rospy
-import sys
-import math
+from sensor_msgs.msg import Imu
+from nav_msgs.msg import Odometry
+from std_msgs.msg import ColorRGBA, Float32, Bool
+from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus
+from geometry_msgs.msg import Point, Pose, Quaternion, Twist, Vector3
+from std_srvs.srv import Trigger, TriggerResponse
+
 import sphero_driver
+from SpheroDict import *
 
 sys.tracebacklimit = 0  # no traceback
 sys.dont_write_bytecode = True
-
-from SpheroDict import *
-from sensor_msgs.msg import Imu
-from nav_msgs.msg import Odometry
-from geometry_msgs.msg import Point, Pose, Quaternion, Twist, Vector3
-from std_msgs.msg import ColorRGBA, Float32, Bool
-from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus
 
 
 class SpheroNode(object):
@@ -35,6 +37,7 @@ class SpheroNode(object):
         self.sampling_divisor = int(400 / self.update_rate)
         # Get Sphero name and address.
         self.is_connected = False
+        self.is_enabled = False
         self._namespace = rospy.get_namespace()
         self._address = rospy.get_param("~address")
         self.robot = sphero_driver.Sphero(self._address)  # A new instance of Sphero
@@ -73,6 +76,9 @@ class SpheroNode(object):
         self.cmd_vel_timeout = rospy.Duration(rospy.get_param('~cmd_vel_timeout', 5.0))
         self.diag_update_rate = rospy.Duration(rospy.get_param('~diag_update_rate', 5.0))
 
+        self.odom = Odometry()
+        self.odom_tare = Odometry()
+
         self.connect_color_red = rospy.get_param('~connect_red', 0)
         self.connect_color_blue = rospy.get_param('~connect_blue', 0)
         self.connect_color_green = rospy.get_param('~connect_green', 255)
@@ -88,6 +94,7 @@ class SpheroNode(object):
         """Connect with Sphero, setup power notification and request data stream."""
         try:
             self.is_connected = self.robot.connect()
+            self.is_enabled = True
             rospy.loginfo("Connected to Sphero %s with address: %s", self._namespace, self._address)
             # Set initial color of Sphero indicating connection.
             self.robot.set_rgb_led(self.connect_color_red, self.connect_color_green,
@@ -123,10 +130,11 @@ class SpheroNode(object):
                 self.get_locator_data()
 
             # If there is no command for velocity longer than 5 seconds, stop the Sphero.
-            if (now - self.last_cmd_vel_time) > self.cmd_vel_timeout:
+            if (now - self.last_cmd_vel_time) > self.cmd_vel_timeout and self.is_enabled:
                 if self.cmd_heading != 0 or self.cmd_speed != 0:
                     self.cmd_heading = 0
                     self.cmd_speed = 0
+                    rospy.logwarn("No cmd_vel received in %.2f seconds. Emergency stop!", self.cmd_vel_timeout.to_sec())
                     self.robot.roll(int(self.cmd_speed), int(self.cmd_heading), 1, False)
             # Update diagnostic info every 5 seconds.
             if (now - self.last_diagnostics_time) > self.diag_update_rate:
@@ -143,12 +151,13 @@ class SpheroNode(object):
 
     def cmd_vel(self, msg):
         """Send command for setting the velocity. Expected message type:Twist."""
-        if self.is_connected:
-            self.last_cmd_vel_time = rospy.Time.now()
-            if (msg.linear.x == 0 and msg.linear.y == 0):
+        self.last_cmd_vel_time = rospy.Time.now()
+        if self.is_connected and self.is_enabled:
+            if msg.linear.x == 0 and msg.linear.y == 0:
                 self.cmd_heading = self.last_cmd_heading
             else:
-                self.cmd_heading = self.normalize_angle_positive(math.atan2(msg.linear.x, msg.linear.y)) * 180 / math.pi
+                self.cmd_heading = self.normalize_angle_positive(
+                    math.atan2(msg.linear.x, msg.linear.y)) * 180 / math.pi
                 self.last_cmd_heading = self.cmd_heading
             self.cmd_speed = math.sqrt(math.pow(msg.linear.x, 2) + math.pow(msg.linear.y, 2))
             self.robot.roll(int(self.cmd_speed), int(self.cmd_heading), 1, False)
@@ -181,13 +190,20 @@ class SpheroNode(object):
     def manual_calibration(self, msg):
         """Function for manual heading calibration."""
         if msg.data:
-            self.robot.set_stabilization(0, False)  # disable stabilization
+            self.is_enabled = False
+            self.last_cmd_heading = 0
+            rospy.sleep(0.5)
             self.robot.set_back_led(255, False)  # turn on tail light
+            self.robot.set_stabilization(0, False)  # disable stabilization
             rospy.logdebug(" Manual calibration mode ON")
         elif not msg.data:
             self.robot.set_heading(0, False)  # set new heading
             self.robot.set_stabilization(1, False)  # re-enable stabilization
             self.robot.set_back_led(0, False)  # turn off tail light
+            self.is_enabled = True
+
+            self.odom_tare = copy.deepcopy(self.odom)
+
             rospy.logdebug(" Manual calibration mode OFF")
 
     def normalize_angle_positive(self, angle):
@@ -232,8 +248,17 @@ class SpheroNode(object):
             odom.twist.twist = Twist(
                 Vector3(data["VELOCITY_X"], data["VELOCITY_Y"], 0), Vector3(0, 0, 0))
 
+            # Save current x and y position.
+            self.odom.pose.pose.position.x = odom.pose.pose.position.x
+            self.odom.pose.pose.position.y = odom.pose.pose.position.y
+
             odom.pose.covariance = ODOM_POSE_COVARIANCE
             odom.twist.covariance = ODOM_TWIST_COVARIANCE
+
+            # This enables resetting odometry data.
+            odom.pose.pose.position.x -= self.odom_tare.pose.pose.position.x
+            odom.pose.pose.position.y -= self.odom_tare.pose.pose.position.y
+
             self.odom_pub.publish(odom)
 
     def get_locator_data(self):
@@ -242,7 +267,6 @@ class SpheroNode(object):
         velocities from streaming location data service.
         """
         data = self.robot.read_locator(True)
-        print(data)
         now = rospy.Time.now()
         odom = Odometry(header=rospy.Header(frame_id="odom"), child_frame_id='base_footprint')
         odom.header.stamp = now
