@@ -16,25 +16,30 @@ Note: The driver can be used without ROS.
 
 
 ## <a name="Installation"></a> Installation
-```sphero_sprk_ros``` is tested on Ubuntu 16.04/ROS Kinetic and Ubuntu 18.04/ROS Melodic. Due to BLE connection problems connected with kernel versions, we verified following versions of the kernel:
+```sphero_sprk_ros``` is tested on Ubuntu 16.04/ROS Kinetic and Ubuntu 18.04/ROS Melodic. Due to BLE connection problems connected with kernel versions, we verified following versions of the kernel (the list is updated as new kernel versions are verified):
 - 4.4.0-21
 - 4.4.0-164
 - 5.0.0-23
 - 5.0.0-29 (Recommended)
+- 5.4.0-48 (Recommended)
 
 ### <a name="Requirements"></a> Requirements
 - Ubuntu 16.04 / Ubuntu 18.04
 - ROS Kinetic / ROS Melodic
 - Python 2.7
 - bluepy (bluez)
+  ```shell script
+  $ sudo apt install bluez
+  $ pip install bluepy
+  ```
 
 Install ```sphero_sprk_ros```:
 ```
-cd catkin_ws/src
-git clone
-cd catkin_ws
-catkin_make
-source catkin_ws/devel/setup.bash
+$ cd <path_to_your_catkin_ws>/src
+$ git clone
+$ cd catkin_ws
+$ catkin build
+$ source <path_to_your_catkin_ws>/devel/setup.bash
 ```
 ## <a name="Usage"></a> Usage
 
