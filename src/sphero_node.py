@@ -111,6 +111,7 @@ class SpheroNode(object):
             # Setup all data streaming.
             self.robot.set_filtered_data_strm(self.sampling_divisor, 1, 0, False)
             self.robot.add_async_callback(chr(0x03), self.parse_data_strm)
+            self.robot.set_locator(0, 0, 0, 0, True)
             rospy.loginfo("Data streaming of Imu data and Odometry is set")
         elif self._data_stream == 'Locator':
             # Setup real-time location data stream.
