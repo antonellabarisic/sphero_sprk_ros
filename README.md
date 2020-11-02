@@ -36,8 +36,7 @@ Note: The driver can be used without ROS.
 Install ```sphero_sprk_ros```:
 ```
 $ cd <path_to_your_catkin_ws>/src
-$ git clone
-$ cd catkin_ws
+$ git clone https://github.com/antonellabarisic/sphero_sprk_ros.git
 $ catkin build
 $ source <path_to_your_catkin_ws>/devel/setup.bash
 ```
@@ -53,25 +52,25 @@ You can easily add multiple robots to launch file.
 ## <a name="pckg"></a> Package description
 
 ### <a name="sub"></a> Subscribed topics
-- ```/sphero_1/cmd_vel```
+- ```/sphero_0/cmd_vel```
   - Type: geometry_msgs/Twist
-- ```/sphero_1/set_color```
+- ```/sphero_0/set_color```
   - Type: std_msgs/ColorRGBA
-- ```/sphero_1/set_heading```
+- ```/sphero_0/set_heading```
   - Type: std_msgs/Float32
-- ```/sphero_1/set_angular_velocity```
+- ```/sphero_0/set_angular_velocity```
   - Type: std_msgs/Float32
-- ```/sphero_1/disable_stabilization```
+- ```/sphero_0/disable_stabilization```
   - Type: std_msgs/Bool
-- ```/sphero_1/manual_calibration```
+- ```/sphero_0/manual_calibration```
   - Type: std_msgs/Bool
 
 ### <a name="pub"></a> Published topics
-- ```/sphero_1/imu```
+- ```/sphero_0/imu```
   - Type: sensor_msgs/Imu
-- ```/sphero_1/odom```
+- ```/sphero_0/odom```
   - Type: nav_msgs/Odometry
-- ```/sphero_1/diagnostics```
+- ```/sphero_0/diagnostics```
   - Type: diagnostic_msgs/DiagnosticArray
 
 ### <a name="Scope"></a> Scope of functionalities
