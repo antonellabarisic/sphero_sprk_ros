@@ -8,6 +8,7 @@ Note: The driver can be used without ROS.
 ## Table of contents
 - [Installation](#Installation)
   - [Requirements](#Requirements)
+  - [Download and build](#download-build)
 - [Usage](#Usage)
 - [Package description](#pckg)
   - [Subscribed topics](#sub)
@@ -16,7 +17,9 @@ Note: The driver can be used without ROS.
 
 
 ## <a name="Installation"></a> Installation
-```sphero_sprk_ros``` is tested on Ubuntu 16.04/ROS Kinetic and Ubuntu 18.04/ROS Melodic. Due to BLE connection problems connected with kernel versions, we verified following versions of the kernel (the list is updated as new kernel versions are verified):
+```sphero_sprk_ros``` was tested on Ubuntu 16.04/ROS Kinetic and Ubuntu 18.04/ROS Melodic running Python 2.7. Ubuntu 20.04/ROS Noetic running Python 3.8 is partially supported. For more details check out branch [noetic-devel](https://github.com/antonellabarisic/sphero_sprk_ros/tree/noetic-devel). 
+
+Due to BLE connection problems connected with kernel versions, we verified following versions of the kernel (the list is updated as new kernel versions are verified):
 - 4.4.0-21
 - 4.4.0-164
 - 5.0.0-23
@@ -24,30 +27,38 @@ Note: The driver can be used without ROS.
 - 5.4.0-48 (Recommended)
 
 ### <a name="Requirements"></a> Requirements
-- Ubuntu 16.04 / Ubuntu 18.04
-- ROS Kinetic / ROS Melodic
-- Python 2.7
+- Ubuntu 16.04, Ubuntu 18.04 or Ubuntu 20.04
+- ROS Kinetic, ROS Melodic or ROS Noetic
+- Python 2.7 (full support) or Python 3.8+ (only sending commands, no data streaming)
 - bluepy (bluez)
   ```shell script
   $ sudo apt install bluez
   $ pip install bluepy
   ```
 
-Install ```sphero_sprk_ros```:
+### <a name="download-build"></a> Download and build
 ```
 $ cd <path_to_your_catkin_ws>/src
-$ git clone https://github.com/antonellabarisic/sphero_sprk_ros.git
+$ git clone https://github.com/antonellabarisic/sphero_sprk_ros.git 
+$ cd <path_to_your_catkin_ws>
 $ catkin build
 $ source <path_to_your_catkin_ws>/devel/setup.bash
 ```
+**Important note:** <br>
+If ```catkin build``` doesn't work on your system, you can use ```catkin_make```. However, these tools are not interchangeable. Once the workspace is build using one of them, the other can't be used in that workspace.
+
 ## <a name="Usage"></a> Usage
 
 Simple launch file for one Sphero SPRK+ is provided. You need to specify MAC address of Sphero, custom name and parameter ```data_stream``` ("All" or "Locator").
-
 ```
 roslaunch sphero_sprk_ros one_sphero.launch
 ```
-You can easily add multiple robots to launch file.
+
+You can easily add multiple robots to launch file or use:
+```
+roslaunch sphero_sprk_ros drivers.launch
+```
+In the second launch file, you specify the number of Sphero roboots. The first _n_ addresses from [cfg/sphero_addresses.txt](cfg/sphero_addresses.txt) will be used to launch _n_ nodes. If _n_=1, both launch files are equivalent.
 
 ## <a name="pckg"></a> Package description
 
@@ -86,6 +97,3 @@ You can easily add multiple robots to launch file.
 - ```set_filtered_data_strm```
 - ```set_locator```
 - ```read_locator```
-
-
-
