@@ -108,19 +108,11 @@ class SpheroNode(object):
             sys.exit(1)
 
         if self._data_stream == 'All':
-            # Setup all data streaming.
-            self.robot.set_filtered_data_strm(self.sampling_divisor, 1, 0, False)
-            self.robot.add_async_callback(chr(0x03), self.parse_data_strm)
-            self.robot.set_locator(0, 0, 0, 0, True)
-            rospy.loginfo("Data streaming of Imu data and Odometry is set")
+            rospy.logfatal('Unfortunately, data streaming does not work in ROS Noetic / Python 3.x. Please disable this option.')
+            sys.exit()
         elif self._data_stream == 'Locator':
-            # Setup real-time location data stream.
-            self.robot.set_locator(1, 0, 0, 0, True)
-            rospy.loginfo("Locator data streaming is set")
-
-        # Setup power notification.
-        self.robot.set_power_notify(True, True)
-        self.robot.add_async_callback(chr(0x01), self.parse_power_notify)
+            rospy.logfatal('Unfortunately, data streaming does not work in ROS Noetic / Python 3.x. Please disable this option.')
+            sys.exit()
 
     def spin(self):
         """Loop"""
@@ -137,10 +129,6 @@ class SpheroNode(object):
                     self.cmd_speed = 0
                     rospy.logwarn("No cmd_vel received in %.2f seconds. Emergency stop!", self.cmd_vel_timeout.to_sec())
                     self.robot.roll(int(self.cmd_speed), int(self.cmd_heading), 1, False)
-            # Update diagnostic info every 5 seconds.
-            if (now - self.last_diagnostics_time) > self.diag_update_rate:
-                self.last_diagnostics_time = now
-                self.get_diagnostics(now)
             r.sleep()
 
     def stop(self):

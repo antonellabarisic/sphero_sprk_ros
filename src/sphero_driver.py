@@ -5,7 +5,6 @@ import binascii
 import operator
 import threading
 import struct
-import rospy
 
 import bluepy
 from util import *
@@ -87,9 +86,9 @@ class DelegateObj(bluepy.btle.DefaultDelegate):
                 elif from_bytes(data[3], 'big') in self._wait_list:
                     self._wait_list[from_bytes(data[3], 'big')] = data
                 elif len(data) == 6 and data[0] == '\xff':  # response on command
-                    rospy.logdebug("Sphero response:{}".format(MRSP[data[2]]))
+                    print("\033[1mSphero response:{}\033[0m".format(MRSP[data[2]]))
                 else:
-                    rospy.logdebug("unknown response:{}".format(data))
+                    print("\033[1mUnknown response:{}\033[0m".format(data))
             elif data[1] == '\xfe':  # Async message
 
                 data_length = (ord(data[3]) << 8) + ord(data[4])
@@ -100,7 +99,7 @@ class DelegateObj(bluepy.btle.DefaultDelegate):
                 elif data[2] == '\x01':  # power info packet
                     self._data_group_callback['\x01'](self.parse_pwr_notify(data_packet, data_length))
                 else:
-                    rospy.logdebug("Unknown async response with ID code:{}".format(from_bytes(data[2])))
+                    print("\033[1mUnknown async response with ID code:{}\033[0m".format(from_bytes(data[2])))
             else:
                 pass
 
@@ -260,13 +259,13 @@ class Sphero(threading.Thread):
             characteristic_dict[uuid_str] = characteristic
         # Anti Denial of Service characteristic
         characteristic = characteristic_dict[AntiDosCharacteristic]
-        characteristic.write("011i3".encode())
+        characteristic.write("011i3".encode(encoding='UTF-8'))
         # TX Power characteristic exposes a device's current transmit power level 
         characteristic = characteristic_dict[TXPowerCharacteristic]
-        characteristic.write('\x0007')
+        characteristic.write("07".encode(encoding='UTF-8'))
         # Initiate wake up
         characteristic = characteristic_dict[WakeCharacteristic]
-        characteristic.write('\x01')
+        characteristic.write("01".encode(encoding='UTF-8'))
 
     def send(self, cmd, data, resp):
         """ 
@@ -283,7 +282,7 @@ class Sphero(threading.Thread):
             output = REQ['WITHOUT_RESPONSE'] + packed_data + [checksum]
 
         with self._notification_lock:
-            self._cmd_characteristics[CommandsCharacteristic].write(''.join(struct.pack('B', x) for x in output))
+            self._cmd_characteristics[CommandsCharacteristic].write(bytes(output))
         return self.seq
 
     def _listening_loop(self):
@@ -312,11 +311,11 @@ class Sphero(threading.Thread):
         """ Create mask list for data streaming """
 
         # sort items in STRM_MASK1 by values
-        sorted_STRM1 = sorted(STRM_MASK1.iteritems(), key=operator.itemgetter(1), reverse=True)
+        sorted_STRM1 = sorted(STRM_MASK1.items(), key=operator.itemgetter(1), reverse=True)
         # create a list containing only the keys specified by user
         self.mask_list1 = [key for key, value in sorted_STRM1 if value & mask1]
         # sort items in STRM_MASK2 by values
-        sorted_STRM2 = sorted(STRM_MASK2.iteritems(), key=operator.itemgetter(1), reverse=True)
+        sorted_STRM2 = sorted(STRM_MASK2.items(), key=operator.itemgetter(1), reverse=True)
         # create a list containing only the keys specified by user
         self.mask_list2 = [key for key, value in sorted_STRM2 if value & mask2]
 
@@ -518,11 +517,11 @@ class Sphero(threading.Thread):
         """
         mask1 = 0
         mask2 = 0
-        for key, value in STRM_MASK1.iteritems():
+        for key, value in STRM_MASK1.items():
             if 'FILTERED' in key:
                 if ('GYRO' in key) or ('ACCEL' in key):
                     mask1 = mask1 | value
-        for value in STRM_MASK2.itervalues():
+        for value in STRM_MASK2.values():
             mask2 = mask2 | value
         self.set_data_strm(sample_div, sample_frames, mask1, pcnt, mask2, response)
 
