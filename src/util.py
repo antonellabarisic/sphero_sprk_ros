@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 """ This module is used for utility and helper functions. """
 
 from bluepy.btle import Scanner
