@@ -40,7 +40,8 @@ Due to BLE connection problems connected with kernel versions, we verified follo
 ```
 $ cd <path_to_your_catkin_ws>/src
 $ git clone https://github.com/antonellabarisic/sphero_sprk_ros.git 
-$ git checkout noetic-devel
+$ cd sphero_sprk_ros 
+$ git checkout noetic-devel 
 $ cd <path_to_your_catkin_ws>
 $ catkin_make
 $ source <path_to_your_catkin_ws>/devel/setup.bash
