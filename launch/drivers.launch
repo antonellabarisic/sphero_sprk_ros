@@ -1,6 +1,6 @@
 <launch>
 	<!-- Set args -->
-  <arg name="num_of_robots" default="1"/>
+  	<arg name="num_of_robots" default="1"/>
 	<arg name="data_stream_option" default="None"/>		<!-- Options for Sphero's data stream: None, All, Locator -->
 
 	<!-- Config file with Sphero addresses -->

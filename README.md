@@ -1,6 +1,6 @@
 # sphero_sprk_ros
 
-This repository contains a Pyhton driver for control and communication with Sphero SPRK+ within ROS. The purpose of this driver is to provide a platform for further research and development of custom applications for Sphero SPRK+ robot.
+This repository contains a Python driver for control and communication with Sphero SPRK+ within ROS. The purpose of this driver is to provide a platform for further research and development of custom applications for Sphero SPRK+ robot.
 
 Example of use with Reynolds flocking algorithm can be found at https://github.com/mkrizmancic/sphero_formation
 
@@ -60,7 +60,7 @@ You can easily add multiple robots to launch file or use:
 ```
 roslaunch sphero_sprk_ros drivers.launch
 ```
-In the second launch file, you specify the number of Sphero roboots. The first _n_ addresses from [cfg/sphero_addresses.txt](cfg/sphero_addresses.txt) will be used to launch _n_ nodes. If _n_=1, both launch files are equivalent.
+In the second launch file, you specify the number of Sphero robots. The first _n_ addresses from [cfg/sphero_addresses.txt](cfg/sphero_addresses.txt) will be used to launch _n_ nodes. If _n_=1, both launch files are equivalent.
 
 ## <a name="pckg"></a> Package description
 
