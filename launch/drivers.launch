@@ -3,6 +3,8 @@
   	<arg name="num_of_robots" default="1"/>
 	<arg name="data_stream_option" default="None"/>		<!-- Options for Sphero's data stream: None, All, Locator -->
 
+	<param name="/num_of_robots" value="$(arg num_of_robots)"/> 
+
 	<!-- Config file with Sphero addresses -->
 	<arg name="filename" default="$(find sphero_sprk_ros)/cfg/sphero_addresses.txt"/>
 
